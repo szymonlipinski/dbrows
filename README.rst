@@ -1,13 +1,11 @@
 DBRows: SQL Database Access With a Nice Interface
-===================================================
+=================================================
 
 DBRows is a simple library for accessing SQL database.
 
 Currently is if tested only on PostgreSQL using Psycopg2.
 However it uses pure DBAPI 2.0 interface, so it should work on other databases as well.
 
-Features
---------
 
 Installation
 ------------
