@@ -9,25 +9,20 @@ class WrongOperationError(Exception):
 class Row(object):
     """A row from a database.
 
-
-    Parameters
-    ----------
-    col_names : List[str]
-        Names of the columns for the row data
-    values : List[str]
-        Values for the row.
-
-
-    Examples
-    --------
-    The row fields can be accessed using 0 based indexes:
-        row[0]
-    or using the column names:
-        row['first']
+    Examples:
+        The row fields can be accessed using 0 based indexes:
+            row[0]
+        or using the column names:
+            row['first']
 
     """
 
     def __init__(self, col_names, values):
+        """
+        Args:
+            col_names (List[str]): Names of the columns for the row data
+            values (List[str]): Values for the row.
+        """
         assert len(col_names) == len(values)
         self._dict = OrderedDict([(name, value) for name, value in zip(col_names, values)])
 
@@ -87,19 +82,12 @@ class Row(object):
 class RowCollection(object):
     """Collection of rows.
 
-
     Notes
     -----
     The collection is lazy, all the rows are downloaded when needed.
-    Nothing is cached, all data is returned.
+    Only the row returned by the `first` property is cached,
+    all other data is not.
 
-
-    Parameters
-    ----------
-    cursor : DBAPI.connection.cursor
-        Opened database cursor with the query results.
-    col_names : List[str]
-        Names of the columns returned by the query.
 
 
     Examples
@@ -112,6 +100,11 @@ class RowCollection(object):
     """
 
     def __init__(self, cursor, col_names):
+        """
+        Args:
+            cursor (DBAPI.connection.cursor): Opened database cursor with the query results.
+            col_names (List[str]): Names of the columns returned by the query.
+        """
         self._cursor = cursor
         self._col_names = col_names
 
@@ -127,15 +120,15 @@ class RowCollection(object):
         return "<RowCollection size={} pending={}>".format(self._cursor.rowcount, self._pending)
 
     def __len__(self):
+        """int: Number of rows returned by the query."""
         return self._size
 
     @property
     def first(self):
         """Row or None: Returns the first row from the result set.
 
-        Notes
-        -----
-        When called multiple times, it returns the same data.
+        Notes:
+            When called multiple times, it returns the same data.
         """
         if not self._got_first:
             data = self._cursor.fetchone()
@@ -150,6 +143,7 @@ class RowCollection(object):
 
     @property
     def pending(self):
+        """int: Number of rows pending for fetching from the database."""
         return self._pending
 
     def __iter__(self):
@@ -162,6 +156,7 @@ class RowCollection(object):
 
     @property
     def size(self):
+        """int: Number of rows returned by the query."""
         return self._size
 
 
@@ -169,6 +164,16 @@ class Transaction(object):
     """Database transaction."""
 
     def __init__(self, database, rollback=None, commit=None):
+        """
+
+        Args:
+            database (Database): A database object.
+            rollback (bool): True if the transaction should be rolled back.
+            commit: (bool): True if the transaction should be committed.
+
+        Raises:
+            ValueError if there `rollback` and `commit` are set to True.
+        """
         if rollback and commit:
             raise ValueError("Cannot set rollback and commit at the same time.")
 
@@ -193,6 +198,28 @@ class Transaction(object):
             self._database.rollback()
 
     def __call__(self, rollback=None, commit=None):
+        """This is magic :)
+
+        The arguments are the same as in the constructor.
+        The constructor will be called when the code looks like:
+
+            Transaction(db, commit=True)
+
+        However there is also a `Database` property `transaction`,
+        which can be used with the `with` clause. Because it is a property,
+        then it must be called as:
+
+            db.transaction
+
+        but to be able to set additional argument I want to write it as:
+
+            db.transaction(commit=True)
+
+        and this calls `__call__` method on the returned object.
+
+        Raises:
+            ValueError if there `rollback` and `commit` are set to True.
+        """
         if rollback and commit:
             raise ValueError("Cannot set rollback and commit at the same time.")
         self._rollback = rollback
@@ -204,13 +231,20 @@ class Transaction(object):
 
     @property
     def closed(self):
+        """bool : True if the transaction is closed, False otherwise."""
         return self._closed
 
 
 class Database(object):
-    """Connection to a database"""
+    """Connection to a database.
+    """
 
     def __init__(self, connstr):
+        """
+
+        Args:
+             connstr (str): Connection string to a database.
+        """
         self._connstr = connstr
         self._open = True
         self._col_names = None
@@ -227,10 +261,21 @@ class Database(object):
 
     @property
     def open(self):
+        """bool : True if the connection is open, False otherwise"""
         return self._open
 
     def query(self, query_str, *params):
-        """Makes a query, and returns the results."""
+        """Makes a query, and returns the results.
+
+        Args:
+            query_str (str): SQL query
+            *params (*args): params for the query
+
+        Returns:
+            RowCollection: Collection of the rows.
+                           If the query didn't return any row,
+                           then the returned RowCollection has no rows.
+        """
         cursor = self._connection.cursor()
         cursor.execute(query_str, tuple(params))
 
@@ -258,6 +303,7 @@ class Database(object):
 
     @property
     def transaction(self):
+        """Transaction: starts a new transaction"""
         return Transaction(self, commit=True)
 
     def __enter__(self):
