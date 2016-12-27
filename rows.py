@@ -1,51 +1,77 @@
 # -*- coding: utf-8 -*-
-import psycopg2 as dbapi
+from collections import OrderedDict
+
 
 class WrongOperationError(Exception):
     pass
 
+
 class Row(object):
-    """A row from database"""
+    """A row from a database.
+
+
+    Parameters
+    ----------
+    col_names : List[str]
+        Names of the columns for the row data
+    values : List[str]
+        Values for the row.
+
+
+    Examples
+    --------
+    The row fields can be accessed using 0 based indexes:
+        row[0]
+    or using the column names:
+        row['first']
+
+    """
 
     def __init__(self, col_names, values):
-        """
-        :param col_names: Tuple with column names
-        :param values: Tuple with values for this row.
-        """
-        self._col_names = col_names
-        self._values = values
-
-        if values is not None:
-            assert len(col_names) == len(values)
+        assert len(col_names) == len(values)
+        self._dict = OrderedDict([(name, value) for name, value in zip(col_names, values)])
 
     @property
     def values(self):
-        return self._values
+        """tuple: Values of the row in the same order as inserted."""
+        return tuple(self._dict.values())
 
     @property
     def col_names(self):
-        return self._col_names
+        """tuple: Names of the columns of the row in the same order as inserted."""
+        return tuple(self._dict.keys())
 
     @property
     def as_dict(self):
-        return {name:value for name, value in zip(self.col_names, self.values)}
+        """dict: The row as a dictionary."""
+        return self._dict
 
     @property
     def size(self):
-        return len(self._values)
+        """int: Number of the columns in the row."""
+        return len(self._dict)
+
+    def __getattr__(self, name):
+        try:
+            return self._dict[name]
+        except KeyError:
+            raise AttributeError("'{0}' has no attribute '{1}'".format(self, name))
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            return self._values[item]
+            return self.values[item]
+        if isinstance(item, basestring):
+            return self._dict[item]
 
     def __len__(self):
-        return len(self._values)
+        return len(self._dict)
 
     def __repr__(self):
-        return '<Row {}>'.format("?")
+        return '<Row {}>'.format(self.as_json)
 
     @property
     def as_json(self):
+        """str: The row as a JSON string."""
         import json
         from decimal import Decimal
 
@@ -55,20 +81,37 @@ class Row(object):
             else:
                 return obj
 
-        return json.dumps(self.as_dict, default=default)
+        return json.dumps(self._dict, default=default, sort_keys=True)
 
 
 class RowCollection(object):
-    """Collection of rows"""
+    """Collection of rows.
+
+
+    Notes
+    -----
+    The collection is lazy, all the rows are downloaded when needed.
+    Nothing is cached, all data is returned.
+
+
+    Parameters
+    ----------
+    cursor : DBAPI.connection.cursor
+        Opened database cursor with the query results.
+    col_names : List[str]
+        Names of the columns returned by the query.
+
+
+    Examples
+    --------
+    The row fields can be accessed using 0 based indexes:
+        row[0]
+    or using the column names:
+        row['first']
+
+    """
 
     def __init__(self, cursor, col_names):
-        """
-
-        :param cursor: Cursor for reading the data from.
-        :param col_names: Tuple of column names.
-        :param cache_all_rows: If True, then the RowCollection will keep all rows in memory,
-                               so the iterator can be reused without making the query again.
-        """
         self._cursor = cursor
         self._col_names = col_names
 
@@ -88,9 +131,11 @@ class RowCollection(object):
 
     @property
     def first(self):
-        """Gets the first row from the result set.
+        """Row or None: Returns the first row from the result set.
 
-        :return: Row or None when the set is empty.
+        Notes
+        -----
+        When called multiple times, it returns the same data.
         """
         if not self._got_first:
             data = self._cursor.fetchone()
@@ -123,19 +168,43 @@ class RowCollection(object):
 class Transaction(object):
     """Database transaction."""
 
-    def __init__(self, database, rollback=True, commit=True):
+    def __init__(self, database, rollback=None, commit=None):
+        if rollback and commit:
+            raise ValueError("Cannot set rollback and commit at the same time.")
+
         self._database = database
         self._rollback = rollback
         self._commit = commit
+        self._closed = False
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+
+        self._closed = True
+
+        if exc_type:
+            self._database.rollback()
+
         if self._commit:
-            self._database.comit()
-        elif self._rollback:
-            self._database.rollbac()
+            self._database.commit()
+        if self._rollback:
+            self._database.rollback()
+
+    def __call__(self, rollback=None, commit=None):
+        if rollback and commit:
+            raise ValueError("Cannot set rollback and commit at the same time.")
+        self._rollback = rollback
+        self._commit = commit
+        return self
+
+    def __repr__(self):
+        return "<Transaction closed:{} commit:{} rollback:{}>".format(self._closed, self._commit, self._rollback)
+
+    @property
+    def closed(self):
+        return self._closed
 
 
 class Database(object):
@@ -147,19 +216,27 @@ class Database(object):
         self._col_names = None
 
         if self._connstr.startswith('postgresql://'):
-            pass
+            import psycopg2 as dbapi
+            self._dbapi = dbapi
+        elif self._connstr.startswith('sqlite://'):
+            import sqlite3 as dbapi
+            self._dbapi = dbapi
+            self._connstr = self._connstr.replace('sqlite://', '')
 
-        self._connection = dbapi.connect(self._connstr)
+        self._connection = self._dbapi.connect(self._connstr)
 
     @property
     def open(self):
         return self._open
 
-    def query(self, query_str, cache_all_rows=False):
+    def query(self, query_str, *params):
         """Makes a query, and returns the results."""
         cursor = self._connection.cursor()
-        cursor.execute(query_str)
-        self._col_names = tuple([col.name for col in cursor.description])
+        cursor.execute(query_str, tuple(params))
+
+        self._col_names = None
+        if cursor.description is not None:
+            self._col_names = tuple([col.name for col in cursor.description])
         return RowCollection(cursor=cursor, col_names=self._col_names)
 
     def close(self):
@@ -169,21 +246,29 @@ class Database(object):
 
     def begin(self):
         """Starts a transaction."""
-        pass
+        self._connection.begin()
 
     def commit(self):
         """Commits a transaction."""
-        pass
+        self._connection.commit()
 
     def rollback(self):
         """Rolls back a transaction."""
-        pass
+        self._connection.rollback()
+
+    @property
+    def transaction(self):
+        return Transaction(self, commit=True)
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+
+
+
+
 
 
 
