@@ -72,7 +72,7 @@ What about transactions? Let's automatically commit:
                 print(row['a'])
                 print(row['b'])
 
-Or even rollback, if you want test something:
+Or even rollback, e.g. if you want to test something:
 
 .. code-block:: python
 
@@ -106,7 +106,7 @@ Design Decisions
 It's nice to have all things automated, and automatically closed database connection, or a transaction.
 That's why the classes like `Transaction` and `Database` have support for the `with` statement.
 
-There are nouns, and verbs. Nouns are some things. Verbs are for doing with the things.
+There are nouns, and verbs. Nouns are for naming some things. Verbs are for doing something with the things.
 Having this in mind, I really don't like class methods like `first()`. This should be rather named
 `get_first()`. Do we really want to have the getters everywhere? I don't, that's why I rather use
 properties. So instead of `rows.get_first()` or `rows.first()` I rather write `rows.first`.
