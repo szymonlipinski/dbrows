@@ -24,6 +24,7 @@ The library was written with one thing in mind: create a nice interface for data
 The simplest example of running a query is:
 
 .. code-block:: python
+
     from dbrows import Database
     db = Database("postgresql://user:pass@localhost:5432/dbname")
     row = db.query("SELECT 1").first
@@ -34,6 +35,7 @@ However we can do a little bit more advanced things like automatically closing t
 (or just releasing it to some connection pool):
 
 .. code-block:: python
+
     from dbrows import Database
     with Database("postgresql://user:pass@localhost:5432/dbname") as db:
         row = db.query("SELECT 1").first
@@ -42,6 +44,7 @@ However we can do a little bit more advanced things like automatically closing t
 Let's also query with arguments:
 
 .. code-block:: python
+
     from dbrows import Database
     with Database("postgresql://user:pass@localhost:5432/dbname") as db:
         row = db.query("SELECT a, b, c FROM tab WHERE something > %s ORDER BY a, b", 30).first
@@ -51,6 +54,7 @@ You can also iterate through all the rows, btw you can also use the column names
 the column indexes:
 
 .. code-block:: python
+
     from dbrows import Database
     with Database("postgresql://user:pass@localhost:5432/dbname") as db:
         for row in db.query("SELECT a, b, c FROM tab WHERE something > %s ORDER BY a, b", 30):
@@ -60,6 +64,7 @@ the column indexes:
 What about transactions? Let's automatically commit:
 
 .. code-block:: python
+
     from dbrows import Database
     with Database("postgresql://user:pass@localhost:5432/dbname") as db:
         with db.transaction:
@@ -70,6 +75,7 @@ What about transactions? Let's automatically commit:
 Or even rollback, if you want test something:
 
 .. code-block:: python
+
     from dbrows import Database
     with Database("postgresql://user:pass@localhost:5432/dbname") as db:
         with db.transaction(rollback=True):
@@ -80,6 +86,7 @@ Or even rollback, if you want test something:
 And of course you don't need to use `with` everywhere:
 
 .. code-block:: python
+
     from dbrows import Database
     db = Database("postgresql://user:pass@localhost:5432/dbname")
     transaction = db.transaction
