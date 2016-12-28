@@ -260,7 +260,7 @@ class Database(object):
         self._connection = self._dbapi.connect(self._connstr)
 
     @property
-    def open(self):
+    def is_open(self):
         """bool : True if the connection is open, False otherwise"""
         return self._open
 
