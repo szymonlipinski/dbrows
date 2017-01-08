@@ -1,4 +1,6 @@
+
 language: python
+
 python:
   - "2.6"
   - "2.7"
@@ -11,14 +13,20 @@ python:
 
 services:
   - postgresql
+
 before_script:
   - psql -c 'create database dbrows;' -U postgres
+  - pip install -e .
+
 test:
   - adapter: postgresql
   - database: dbrows_test
   - python setup.py test
+
 env:
   - ROWS_DB_TEST=postgresql://postgres@localhost/dbrows
+
 install:
   - pip install -r .travis.requirements.txt
+
 script: pytest tests
