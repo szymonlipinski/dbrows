@@ -1,9 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+import os
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
-version = '0.5.0'
+version = '0.6.0'
+
+
+class PyTest(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        pytest.main(self.test_args)
+
 
 setup(
     name='dbrows',
@@ -15,6 +32,10 @@ setup(
     url='https://github.com/szymonlipinski/dbrows',
     packages=find_packages(),
     license='MIT',
+    install_requires=['six'],
+    test_suite='tests',
+    tests_require=['pytest', 'tox', 'psycopg2'],
+    cmdclass = {'test': PyTest},
     classifiers=[
             'Development Status :: 4 - Beta',
             'Intended Audience :: Developers',
@@ -30,3 +51,4 @@ setup(
             'Topic :: Database',
     ],
 )
+

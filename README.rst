@@ -103,6 +103,22 @@ And of course you don't need to use ``with`` everywhere:
 Design Decisions
 ----------------
 
+Why Rows not Records?
+---------------------
+
+Well, there is a fundamental difference between what a ``record``, and a ``row`` mean.
+
+The main difference is that the ``record`` describes a physical storage. When you define
+a ``record`` e.g. in ``C`` or ``C++``, then you define the ``fields``,
+and how the exact order of how they are stored in memory.
+
+When you define a database ``table`` with some ``columns``, then you have a ``row``.
+That's just a logical declaration of what kind of data you want to have. Database is free
+to reorder everything as it wants. You don't have to know the real ordering of the ``columns``,
+they can be stored in different files, on different disks, in different order.
+It's is also possible that they are not stored at all, they can be just calculated
+whey you ask the database to give you a row.
+
 Support of With
 ~~~~~~~~~~~~~~~
 

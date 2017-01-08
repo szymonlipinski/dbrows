@@ -1,4 +1,4 @@
-from rows import Database, RowCollection, Row, WrongOperationError, Transaction
+from dbrows import Database, RowCollection, Row, WrongOperationError, Transaction
 import pytest
 import unittest
 import psycopg2 as dbapi
@@ -53,17 +53,17 @@ def drop_table_if_exists(db, name):
 class TestDatabaseConnection(unittest.TestCase):
     def test_connection(self):
         db = Database(connstr)
-        assert db.open
+        assert db.is_open
 
         db.close()
-        assert not db.open
+        assert not db.is_open
 
     def test_bad_uri(self):
         try:
             Database("bad uri")
             assert False, "Should get exception"
         except Exception as e:
-            print e
+            pass
 
     def test_bad_connection(self):
         with pytest.raises(dbapi.OperationalError):
@@ -88,14 +88,14 @@ class TestDatabase(unittest.TestCase):
     def test_calling_first_twice(self):
         db = Database(connstr)
         assert db
-        assert db.open
+        assert db.is_open
         rows = db.query("""SELECT i, t, v, d, dc FROM test""")
         assert rows.first == rows.first
         assert rows.first is rows.first
 
     def test_simple_db_query(self):
         with Database(connstr) as db:
-            assert db.open
+            assert db.is_open
             rows = db.query("""SELECT i, t, v, d, dc FROM test WHERE i = 1""")
             assert rows
             assert isinstance(rows, RowCollection)
@@ -172,7 +172,7 @@ class TestDatabase(unittest.TestCase):
             fd = first.as_dict
             assert isinstance(fd, dict)
             assert sorted(fd.keys()) == sorted(list(first.col_names))
-            assert sorted(fd.values()) == sorted(list(first.values))
+            assert list(fd.values()) == list(first.values)
 
     def test_row_as_json(self):
         with Database(connstr) as db:
