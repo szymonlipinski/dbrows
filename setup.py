@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-import os
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
@@ -17,7 +15,6 @@ class PyTest(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
         import pytest
         pytest.main(self.test_args)
 

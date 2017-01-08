@@ -98,6 +98,16 @@ And of course you don't need to use ``with`` everywhere:
     db.close()
 
 
+Testing
+-------
+
+To test the dbrows, just write:
+
+.. code-block:: bash
+
+    $ python setup.py test
+
+This should install all the needed libraries, and run tests.
 
 
 Design Decisions
