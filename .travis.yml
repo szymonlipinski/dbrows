@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+install: "python setup test"
+script: pytest tests
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database dbrows_test;' -U postgres
+test:
+  - adapter: postgresql
+  - database: dbrows_test
+env:
+  - ROWS_DB_TEST=postgresql://postgres@localhost/dbrows_test
