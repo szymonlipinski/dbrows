@@ -1,4 +1,8 @@
-{<img src="https://travis-ci.org/szymonlipinski/dbrows.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/szymonlipinski/dbrows]
+
+.. image:: https://travis-ci.org/szymonlipinski/dbrows.svg?branch=master
+    :target: https://travis-ci.org/szymonlipinski/dbrow
+    :alt: Travis Build Status
+
 
 DBRows: SQL Database Access With a Nice Interface
 =================================================
