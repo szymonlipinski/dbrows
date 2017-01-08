@@ -32,7 +32,7 @@ setup(
     install_requires=['six'],
     test_suite='tests',
     tests_require=['pytest', 'tox', 'psycopg2'],
-    cmdclass = {'test': PyTest},
+    cmdclass={'test': PyTest},
     classifiers=[
             'Development Status :: 4 - Beta',
             'Intended Audience :: Developers',
@@ -48,4 +48,3 @@ setup(
             'Topic :: Database',
     ],
 )
-

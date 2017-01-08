@@ -1,4 +1,4 @@
-from dbrows import Database, RowCollection, Row, WrongOperationError, Transaction
+from dbrows import Database, RowCollection, Row
 import pytest
 import unittest
 import psycopg2 as dbapi
@@ -40,7 +40,10 @@ def assert_table_doesnt_exist(db, name):
 
 
 def table_exists(db, name):
-    rows = db.query("SELECT 42 FROM information_schema.tables WHERE table_name = '{}'".format(name))
+    rows = db.query("""
+        SELECT 42
+        FROM information_schema.tables
+        WHERE table_name = '{}'""".format(name))
     return rows.size == 1
 
 
@@ -161,7 +164,6 @@ class TestDatabase(unittest.TestCase):
                 assert row == first
                 assert row is first
 
-
     def test_row_as_dict(self):
         with Database(connstr) as db:
             rows = db.query("""SELECT 1 "c_one", 'two' "c_two", 3.0 "c_three" """)
@@ -240,7 +242,7 @@ class TestDatabase(unittest.TestCase):
     def test_transaction_rollback(self):
         with Database(connstr) as db:
             drop_table_if_exists(db, 'trans_test')
-            with db.transaction(rollback=True) as t:
+            with db.transaction(rollback=True):
                 db.query("CREATE TABLE trans_test (i integer);")
 
             assert_table_doesnt_exist(db, 'trans_test')

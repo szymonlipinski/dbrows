@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
-
 from six import string_types
+
 
 class WrongOperationError(Exception):
     pass
@@ -25,7 +25,10 @@ class Row(object):
             values (List[str]): Values for the row.
         """
         assert len(col_names) == len(values)
-        self._dict = OrderedDict([(name, value) for name, value in zip(col_names, values)])
+        self._dict = OrderedDict(
+            [(name, value)
+             for name, value
+             in zip(col_names, values)])
 
     @property
     def values(self):
@@ -34,7 +37,7 @@ class Row(object):
 
     @property
     def col_names(self):
-        """tuple: Names of the columns of the row in the same order as inserted."""
+        """tuple: Names of the columns in the same order as inserted."""
         return tuple(self._dict.keys())
 
     @property
@@ -51,7 +54,8 @@ class Row(object):
         try:
             return self._dict[name]
         except KeyError:
-            raise AttributeError("'{0}' has no attribute '{1}'".format(self, name))
+            raise AttributeError("'{0}' has no attribute '{1}'"
+                                 .format(self, name))
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -228,7 +232,8 @@ class Transaction(object):
         return self
 
     def __repr__(self):
-        return "<Transaction closed:{} commit:{} rollback:{}>".format(self._closed, self._commit, self._rollback)
+        return "<Transaction closed:{} commit:{} rollback:{}>".\
+            format(self._closed, self._commit, self._rollback)
 
     @property
     def closed(self):
@@ -312,12 +317,3 @@ class Database(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-
-
-
-
-
-
-
-
-
