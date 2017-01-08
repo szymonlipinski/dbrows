@@ -8,8 +8,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-install: "python setup.py test"
-script: pytest tests
+
 services:
   - postgresql
 before_script:
@@ -19,3 +18,5 @@ test:
   - database: dbrows_test
 env:
   - ROWS_DB_TEST=postgresql://postgres@localhost/dbrows_test
+install: "python setup.py test"
+script: pytest tests
