@@ -4,8 +4,10 @@
     :alt: Travis Build Status
 
 
+
 DBRows: SQL Database Access With a Nice Interface
-=================================================
++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 DBRows is a simple library for accessing SQL database.
 
@@ -14,7 +16,8 @@ However it uses pure DBAPI 2.0 interface, so it should work on other databases a
 
 
 Installation
-------------
+============
+
 
 To install dbrows, just write:
 
@@ -22,8 +25,10 @@ To install dbrows, just write:
 
     $ pip install dbrows
 
+
 Examples
----------
+========
+
 
 The library was written with one thing in mind: create a nice interface for databases.
 
@@ -105,7 +110,8 @@ And of course you don't need to use ``with`` everywhere:
 
 
 Testing
--------
+=======
+
 
 To test the dbrows, just write:
 
@@ -117,10 +123,12 @@ This should install all the needed libraries, and run tests.
 
 
 Design Decisions
-----------------
+================
+
 
 Why Rows not Records?
----------------------
+~~~~~~~~~~~~~~~~~~~~~
+
 
 Well, there is a fundamental difference between what a ``record``, and a ``row`` mean.
 
@@ -135,13 +143,16 @@ they can be stored in different files, on different disks, in different order.
 It's is also possible that they are not stored at all, they can be just calculated
 whey you ask the database to give you a row.
 
+
 Support of With
 ~~~~~~~~~~~~~~~
+
 
 It's nice to have all things automated. Something like automatically closed database connection,
 or automatically committed transaction.
 That's why the classes like ``Transaction`` and ``Database`` have support for the ``with`` statement.
 The great thing about ``with`` is that you really don't have to use it.
+
 
 Properties and Actions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -224,5 +235,8 @@ However for the ``Database`` class there are some actions. The interface is:
     rollback()
 
 
+Links
+=====
 
 
+`PyPi project page <https://pypi.python.org/pypi/dbrows/>`
