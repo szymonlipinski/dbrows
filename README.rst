@@ -239,4 +239,4 @@ Links
 =====
 
 
-`PyPi project page <https://pypi.python.org/pypi/dbrows/>`
+`PyPi project page https://pypi.python.org/pypi/dbrows/`
