@@ -1,6 +1,6 @@
 
 .. image:: https://travis-ci.org/szymonlipinski/dbrows.svg?branch=master
-    :target: https://travis-ci.org/szymonlipinski/dbrow
+    :target: https://travis-ci.org/szymonlipinski/dbrows
     :alt: Travis Build Status
 
 
