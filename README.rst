@@ -1,3 +1,5 @@
+{<img src="https://travis-ci.org/szymonlipinski/dbrows.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/szymonlipinski/dbrows]
+
 DBRows: SQL Database Access With a Nice Interface
 =================================================
 
