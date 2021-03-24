@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
-from six import string_types
 
 
 class WrongOperationError(Exception):
@@ -60,7 +59,7 @@ class Row(object):
     def __getitem__(self, item):
         if isinstance(item, int):
             return self.values[item]
-        if isinstance(item, string_types):
+        if isinstance(item, str):
             return self._dict[item]
 
     def __len__(self):

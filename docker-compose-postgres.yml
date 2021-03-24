@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+
+  db:
+    image: postgres:${DB_VERSION}
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+
+  test:
+    container_name: test-${DB_ENGINE}-${PYTHON_VERSION}
+    build:
+      context: .
+      args:
+        DB_ENGINE: ${DB_ENGINE}
+        PYTHON_VERSION: ${PYTHON_VERSION}
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+    links:
+      - db
+

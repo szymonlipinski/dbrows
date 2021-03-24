@@ -10,6 +10,17 @@ import datetime
 
 connstr = environ.get("ROWS_DB_TEST")
 
+DB_HOST = environ.get("DB_HOST")
+DB_USER = environ.get("DB_USER")
+DB_PASS = environ.get("DB_PASS")
+DB_NAME = environ.get("DB_NAME")
+
+connstr = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+
+# connstr = f"host='{DB_HOST}' dbname='{DB_NAME}' user='{DB_USER}' password='{DB_PASS}'"
+
+
+
 Table = namedtuple("Table", ['schema', 'name', 'type'])
 
 
